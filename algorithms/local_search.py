@@ -28,8 +28,41 @@ Date: November 2025
 
 import time
 
+def init_greedy(G):
+    """
+    Greedy initialization for maximum clique.
+    Matches local_search expectations:
+    - G: adjacency dictionary {node: set(neighbors)}
+    Returns:
+        clique (set): nodes forming the greedy clique
+        runtime (float): time taken in seconds
+    """
 
-def advanced_local_search_optimized(G, start_clique):
+    start_time = time.time()
+
+    # Sort nodes by degree descending
+    nodes_sorted = sorted(G.keys(), key=lambda x: len(G[x]), reverse=True)
+
+    best_clique = set()
+
+    # Greedy trial: start a clique from each node
+    for node in nodes_sorted:
+        clique = {node}
+
+        for other in nodes_sorted:
+            if other == node:
+                continue
+            # Check if 'other' connects to all current clique members
+            if all(other in G[member] for member in clique):
+                clique.add(other)
+
+        if len(clique) > len(best_clique):
+            best_clique = clique
+
+    runtime = time.time() - start_time
+    return best_clique, runtime
+
+def local_search(G):
     """
     Advanced deterministic local search for the maximum clique problem.
 
@@ -59,7 +92,7 @@ def advanced_local_search_optimized(G, start_clique):
     """
 
     start_time = time.time()
-    clique = set(start_clique)
+    clique, times = init_greedy(G)
     improved = True
 
     # Prunes all vertices that can’t connect to every member of the current clique.
@@ -163,8 +196,7 @@ if __name__ == "__main__":
         6: {4, 5}
     }
 
-    start_clique = {1, 2}
-    best, runtime = advanced_local_search_optimized(G, start_clique)
+    best, runtime = local_search(G)
 
     print(f"Advanced Local Search Clique: {best}")
     print(f"Size: {len(best)}, Time: {runtime:.6f} seconds")
