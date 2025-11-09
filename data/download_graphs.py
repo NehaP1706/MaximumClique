@@ -1,6 +1,7 @@
 import os
 import requests
 import gzip
+import bz2
 import shutil
 import networkx as nx
 import urllib3
@@ -9,8 +10,11 @@ import zipfile
 import tarfile
 from tempfile import TemporaryDirectory
 from scipy.io import mmread
+from io import StringIO
+import csv
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 
 def save_as_adjlist(G, output_path):
     """Save the graph in adjacency list format: node: neighbor1 neighbor2 ..."""
@@ -19,13 +23,12 @@ def save_as_adjlist(G, output_path):
             neighbors = " ".join(str(n) for n in sorted(G.neighbors(node)))
             f.write(f"{node}: {neighbors}\n")
 
+
 def load_graph(path):
     """
-    Load a graph from various formats into a NetworkX graph.
-    Automatically handles GraphML files with unsupported attribute types
-    (vector_float, vector_string, short) by converting them to strings.
+    Load a graph from various formats (including compressed archives and DIMACS) 
+    and return a NetworkX Graph.
     """
-    # ext = os.path.splitext(path)[1].lower()
     fname = os.path.basename(path).lower()
 
     # Detect .tar.gz and .tgz first
@@ -34,12 +37,43 @@ def load_graph(path):
     else:
         ext = os.path.splitext(path)[1].lower()
 
+    # --- BZ2 ---
+    if ext == ".bz2":
+        print(f"📂 Loading .bz2: {fname}")
+        with bz2.open(path, "rt", encoding="utf-8", errors="ignore") as f:
+            content = f.read().strip().splitlines()
 
-    if ext == ".gz":
-        with gzip.open(path, "rt", encoding="utf-8") as f:
-            G = nx.read_edgelist(f, comments="#", nodetype=int)
+        if any(line.lower().startswith("*vertices") for line in content[:10]):
+            try:
+                with bz2.open(path, "rt", encoding="utf-8", errors="ignore") as f:
+                    G = nx.read_pajek(f)
+                    return nx.Graph(G)
+            except Exception as e:
+                print(f"⚠️ Pajek read failed, trying edge list: {e}")
+
+        edges = []
+        for line in content:
+            parts = line.strip().split()
+            if len(parts) >= 2:
+                try:
+                    u, v = parts[:2]
+                    edges.append((u, v))
+                except Exception:
+                    continue
+        G = nx.Graph()
+        G.add_edges_from(edges)
+        return G
+
+    # --- GZ ---
+    elif ext == ".gz":
+        print(f"📂 Loading .gz: {fname}")
+        with gzip.open(path, "rt", encoding="utf-8", errors="ignore") as f:
+            G = nx.read_edgelist(f, comments="#", nodetype=str)
+        return G
+
+    # --- TAR / TAR.GZ / TGZ ---
     elif ext in [".tar", ".tar.gz", ".tgz"]:
-        # Handle tar and tar.gz archives
+        print(f"📦 Extracting .tar/.tgz: {fname}")
         with TemporaryDirectory() as tmpdir:
             with tarfile.open(path, "r:*") as tar:
                 tar.extractall(tmpdir)
@@ -49,170 +83,39 @@ def load_graph(path):
                 for file in files:
                     if not file.startswith('.') and '__MACOSX' not in root:
                         extracted_files.append(os.path.join(root, file))
-
-            print(f"🔍 Found {len(extracted_files)} files in {os.path.basename(path)}")
-            for f in extracted_files:
-                print(f"   - {os.path.basename(f)}")
-
+            
             if not extracted_files:
                 raise ValueError(f"No files found inside {path}")
 
-            # Prefer files with "edge" in the name
-            graph_file = None
-            for f in extracted_files:
-                fname_lower = os.path.basename(f).lower()
-                if "edge" in fname_lower and (f.endswith(".tsv") or f.endswith(".txt") or f.endswith(".edges")):
-                    graph_file = f
-                    break
+            # Find the best graph file (or first one)
+            graph_file = next((f for f in extracted_files if any(f.lower().endswith(ext) for ext in ['.tsv', '.txt', '.edges', '.net', '.graphml', '.gml', '.clq', '.csv', '.mtx'])), extracted_files[0])
+            
+            # --- FIX: Recursively call load_graph on the extracted file ---
+            G = load_graph(graph_file)
+            print(f"✅ Loaded unweighted graph from archive: {len(G.nodes())} nodes, {len(G.edges())} edges")
+            return G
 
-            # Fallback: if no "edges" file found, pick the first .tsv/.txt/.edges file
-            if not graph_file:
-                for f in extracted_files:
-                    if f.endswith(".tsv") or f.endswith(".txt") or f.endswith(".edges"):
-                        graph_file = f
-                        break
-
-            if not graph_file:
-                raise ValueError(f"No suitable edge list found inside {path}")
-
-            # ---- Simple parser: ignore the 3rd column (weights) ----
-            print(f"📂 Loading edge list from {graph_file}")
-
-            edges = []
-            with open(graph_file) as f:
-                for line in f:
-                    parts = line.strip().split('\t')
-                    if len(parts) >= 2:
-                        try:
-                            u, v = int(parts[0]), int(parts[1])
-                            edges.append((u, v))
-                        except ValueError:
-                            continue  # skip malformed lines safely
-
-            G = nx.Graph()
-            G.add_edges_from(edges)
-            print(f"✅ Loaded unweighted graph: {len(G.nodes())} nodes, {len(G.edges())} edges")
-
-            if len(G.edges()) == 0:
-                raise ValueError(f"No valid edges found in {graph_file}")
-
-    elif ext in [".txt", ".edges", ".clq"]:
-        if ext == ".clq":
-            # DIMACS .clq format
-            try:
-                # Try using NetworkX's read_edgelist with custom comments
-                G = nx.read_edgelist(path, comments=['c', 'p'], 
-                                    nodetype=int, 
-                                    data=False)
-            except:
-                # Fallback: manual parsing
-                edges = []
-                with open(path, "r") as f:
-                    for line in f:
-                        line = line.strip()
-                        if line.startswith('e '):
-                            parts = line.split()
-                            if len(parts) >= 3:
-                                try:
-                                    edges.append((int(parts[1]), int(parts[2])))
-                                except ValueError:
-                                    continue
-                G = nx.Graph()
-                G.add_edges_from(edges)
-        else:
-            G = nx.read_edgelist(path, comments="#", nodetype=int)
-    elif ext == ".graphml":
-        # Clean unsupported attribute types on the fly
-        with open(path, "r", encoding="utf-8") as f:
-            data = f.read()
-        data = (data
-                .replace('attr.type="vector_float"', 'attr.type="string"')
-                .replace('attr.type="vector_string"', 'attr.type="string"')
-                .replace('attr.type="short"', 'attr.type="string"'))
-        # Write to temporary in-memory file (StringIO) for NetworkX
-        from io import StringIO
-        temp_file = StringIO(data)
-        G_full = nx.read_graphml(temp_file)
-        G = nx.Graph()
-        G.add_edges_from(G_full.edges())
-    elif ext == ".gml":
-        G_full = nx.read_gml(path)
-        G = nx.Graph()
-        G.add_edges_from(G_full.edges())
-    elif ext == ".csv":
-        df = pd.read_csv(path, index_col=0)
-        G = nx.from_pandas_adjacency(df)
+    # --- ZIP ---
     elif ext == ".zip":
+        print(f"📦 Extracting .zip: {fname}")
         with TemporaryDirectory() as tmpdir:
             with zipfile.ZipFile(path, "r") as zf:
                 zf.extractall(tmpdir)
-
-            # Recursively find all files (not just top-level)
+            
             extracted_files = []
             for root, dirs, files in os.walk(tmpdir):
                 for file in files:
-                    # Skip hidden files and __MACOSX
                     if not file.startswith('.') and '__MACOSX' not in root:
                         extracted_files.append(os.path.join(root, file))
             
-            print(f"🔍 Found {len(extracted_files)} files in {os.path.basename(path)}")
-            for f in extracted_files:
-                print(f"   - {os.path.basename(f)}")
-            
             if not extracted_files:
                 raise ValueError(f"No files found inside {path}")
-
-            # Determine output directory based on the original zip's location
-            raw_dir = os.path.dirname(path)
-            if "small" in raw_dir:
-                out_dir = raw_dir.replace("raw_graphs/small", "small_graphs")
-            elif "medium" in raw_dir:
-                out_dir = raw_dir.replace("raw_graphs/medium", "medium_graphs")
-            elif "large" in raw_dir:
-                out_dir = raw_dir.replace("raw_graphs/large", "large_graphs")
-            else:
-                out_dir = os.path.dirname(path)
             
-            os.makedirs(out_dir, exist_ok=True)
-
-            output_graphs = []
-            for fpath in extracted_files:
-                fname = os.path.basename(fpath)
-                base, subext = os.path.splitext(fname)
-                subext = subext.lower()
-
-                try:
-                    if subext == ".mtx":
-                        from scipy.io import mmread
-                        matrix = mmread(fpath)
-                        G_sub = nx.from_scipy_sparse_array(matrix)
-                        out_name = f"{base}.adj"
-                    elif subext in [".edges", ".txt"]:
-                        G_sub = nx.read_edgelist(fpath, nodetype=str, comments='#')
-                        out_name = f"{fname}.adj"
-
-                    # Only add to output if graph has edges
-                    if len(G_sub.edges()) > 0:
-                        output_graphs.append((out_name, G_sub))
-                    else:
-                        print(f"⚠️ Skipping {fname}: 0 edges")
-
-                except Exception as e:
-                    print(f"⚠️ Skipping {fname} in {os.path.basename(path)}: {e}")
-
-            if not output_graphs:
-                raise ValueError(f"No valid graph files found inside {path}")
-
-            # Write separate .adj files
-            for out_name, G in output_graphs:
-                out_path = os.path.join(out_dir, out_name)
-                save_as_adjlist(G, out_path)
-                print(f"✅ Extracted & saved: {out_path} ({len(G.nodes())} nodes, {len(G.edges())} edges)")
-
-            # Return the first graph (for compatibility)
-            return output_graphs[0][1]
+            # Recursively load the first extracted file
+            return load_graph(extracted_files[0])
+            
+    # --- 7Z (requires py7zr) ---
     elif ext == ".7z":
-        # Handle .7z files (requires py7zr library)
         try:
             import py7zr
         except ImportError:
@@ -222,113 +125,172 @@ def load_graph(path):
             with py7zr.SevenZipFile(path, 'r') as archive:
                 archive.extractall(tmpdir)
 
-            extracted_files = [os.path.join(tmpdir, f) for f in os.listdir(tmpdir) 
-                             if os.path.isfile(os.path.join(tmpdir, f))]
+            extracted_files = [os.path.join(tmpdir, f) for f in os.listdir(tmpdir) if os.path.isfile(os.path.join(tmpdir, f))]
             if not extracted_files:
                 raise ValueError(f"No files found inside {path}")
 
-            # Determine output directory
+            # Determine output directory for saving .adj files (unique feature of first script)
             raw_dir = os.path.dirname(path)
-            if "small" in raw_dir:
-                out_dir = raw_dir.replace("raw_graphs/small", "small_graphs")
-            elif "medium" in raw_dir:
-                out_dir = raw_dir.replace("raw_graphs/medium", "medium_graphs")
-            elif "large" in raw_dir:
-                out_dir = raw_dir.replace("raw_graphs/large", "large_graphs")
-            else:
-                out_dir = os.path.dirname(path)
-            
+            out_dir = raw_dir.replace("raw_graphs/small", "small_graphs").replace("raw_graphs/medium", "medium_graphs").replace("raw_graphs/large", "large_graphs")
             os.makedirs(out_dir, exist_ok=True)
-            # Process each extracted file
+            
+            output_graphs = []
             for fpath in extracted_files:
                 fname = os.path.basename(fpath)
                 try:
-                    # Try as edgelist
-                    G_sub = nx.read_edgelist(fpath, nodetype=str)
-                    out_name = f"{fname}.adj"
-                    out_path = os.path.join(out_dir, out_name)
-                    save_as_adjlist(G_sub, out_path)
-                    print(f"✅ Extracted & saved: {out_path} ({len(G_sub.nodes())} nodes, {len(G_sub.edges())} edges)")
-                    return G_sub
+                    G_sub = load_graph(fpath) # Recursive call
+                    if len(G_sub.edges()) > 0:
+                        out_name = f"{os.path.splitext(fname)[0]}.adj"
+                        out_path = os.path.join(out_dir, out_name)
+                        save_as_adjlist(G_sub, out_path)
+                        print(f"✅ Extracted & saved: {out_path} ({len(G_sub.nodes())} nodes, {len(G_sub.edges())} edges)")
+                        output_graphs.append(G_sub)
                 except Exception as e:
-                    print(f"⚠️ Skipping {fname} in {os.path.basename(path)}: {e}")
+                    print(f"⚠️ Skipping {fname}: {e}")
             
-            raise ValueError(f"No valid graph files found inside {path}")
+            if not output_graphs:
+                raise ValueError(f"No valid graph files found inside {path}")
+            return output_graphs[0] 
+
+    # --- Matrix Market (MTX) ---
     elif ext == ".mtx":
-        # MatrixMarket format
+        print(f"📂 Loading .mtx: {fname}")
         matrix = mmread(path)
-        G = nx.from_scipy_sparse_array(matrix)
+        return nx.from_scipy_sparse_array(matrix)
+
+    # --- CLQ (DIMACS format) ---
+    elif ext == ".clq":
+        print(f"📂 Loading .clq: {fname}")
+        edges = []
+        with open(path, "r") as f:
+            for line in f:
+                if line.startswith("e "):
+                    parts = line.split()
+                    if len(parts) >= 3:
+                        edges.append((parts[1], parts[2])) 
+        G = nx.Graph()
+        G.add_edges_from(edges)
+        return G
+
+    # --- GraphML ---
+    elif ext == ".graphml":
+        print(f"📂 Loading .graphml: {fname}")
+        with open(path, "r", encoding="utf-8") as f:
+            data = f.read()
+        data = (data
+                .replace('attr.type="vector_float"', 'attr.type="string"')
+                .replace('attr.type="vector_string"', 'attr.type="string"')
+                .replace('attr.type="short"', 'attr.type="string"'))
+        
+        temp_file = StringIO(data)
+        G_full = nx.read_graphml(temp_file)
+        G = nx.Graph()
+        G.add_edges_from(G_full.edges())
+        return G
+
+    # --- GML ---
+    elif ext == ".gml":
+        print(f"📂 Loading .gml: {fname}")
+        G_full = nx.read_gml(path)
+        G = nx.Graph()
+        G.add_edges_from(G_full.edges())
+        return G
+
+    # --- CSV / TSV ---
+    elif ext in [".csv", ".tsv"]:
+        print(f"📂 Loading {ext}: {fname}")
+        # Use pandas for generic delimited files
+        if ext == ".tsv":
+            # Using read_csv and specifying separator for TSV
+            df = pd.read_csv(path, sep='\t', header=None, comment='#')
+        else:
+            df = pd.read_csv(path, header=None, comment='#')
+            
+        # Try to treat the first two columns as an edge list
+        if df.shape[1] >= 2:
+            edges = [(str(row[0]), str(row[1])) for index, row in df.iterrows()]
+            G = nx.Graph()
+            G.add_edges_from(edges)
+            return G
+        raise ValueError(f"CSV/TSV file {fname} is not a valid edge list.")
+
+    # --- Pajek (.graph/.net) ---
+    elif ext in [".graph", ".net"]:
+        print(f"📂 Loading .graph/.net (Pajek): {fname}")
+        G = nx.read_pajek(path)
+        return nx.Graph(G)
+
+    # --- Default edge list (.txt, .edges, etc.) ---
+    elif ext in [".txt", ".edges"]:
+         print(f"📂 Loading edge list: {fname}")
+         # Attempt to read as an edgelist (will try to infer types)
+         G = nx.read_edgelist(path, comments="#", nodetype=str)
+         return G
     else:
         raise ValueError(f"Unsupported format: {ext}")
 
-    # Relabel nodes as integers if possible
+
+def convert_graph_to_adjlist(input_path, output_path):
+    """Convert and save as adjacency list."""
+    G = load_graph(input_path)
+    
+    # --- Final Node Relabeling ---
     mapping = {}
     for n in G.nodes():
         try:
             mapping[n] = int(n)
         except:
-            mapping[n] = n
-    if mapping:
+            mapping[n] = n 
+    if len(mapping) > 0 and any(k != v for k, v in mapping.items()):
         G = nx.relabel_nodes(G, mapping)
-
-    return G
-
-def convert_graph_to_adjlist(input_path, output_path):
-    """Convert a single graph to adjacency list format."""
-    G = load_graph(input_path)
+        
     save_as_adjlist(G, output_path)
     print(f"✅ Saved adjacency list: {output_path} ({len(G.nodes())} nodes, {len(G.edges())} edges)")
 
+
+# ---------------- DATASETS (Merged) ----------------
 datasets = {
     "small": [
-        # ("karate_club", "https://github.com/mlabonne/graph-datasets/blob/main/node_classification/karate-club/karate.gml"),
-        # ("game_of_thrones", "https://chatox.github.io/networks-science-course/practicum/data/game-of-thrones/"),
-        # ("marvel_heroes", "https://chatox.github.io/networks-science-course/practicum/data/marvel-hero.csv"),
-        # ("flavor_network", "https://chatox.github.io/networks-science-course/practicum/data/flavor-network/"),
-        # ("ogdos_100", "<link-to-OGDOS-graph-~100nodes>"),
         ("holy", "https://graphchallenge.s3.amazonaws.com/synthetic/partitionchallenge/static/simulated_blockmodel_graph_50_nodes.tar.gz"),
+        ("dolphin","https://sites.cc.gatech.edu/dimacs10/archive/data/clustering/dolphins.graph.bz2"),
+        ("karate","https://sites.cc.gatech.edu/dimacs10/archive/data/clustering/karate.graph.bz2"),
     ],
     "medium": [
-        # ("adjnoun_adj", "http://statml.com/download/data_7z/misc/adjnoun_adjacency.7z"),
         ("dimac-c125", "https://iridia.ulb.ac.be/~fmascia/files/DIMACS/C125.9.clq"),
         ("keller-4", "https://iridia.ulb.ac.be/~fmascia/files/DIMACS/keller4.clq"),
         ("student_cooperation", "https://chatox.github.io/networks-science-course/practicum/data/student-cooperation.graphml"),
         ("brock200_2", "https://iridia.ulb.ac.be/~fmascia/files/DIMACS/brock200_2.clq"),
-        # ("tscc", "https://statml.com/download/data_7z/tscc/scc_enron-only.7z")
+        ("adjnoun_graph", "https://sites.cc.gatech.edu/dimacs10/archive/data/clustering/adjnoun.graph.bz2"),
     ],
     "large": [
         ("facebook_combined", "https://snap.stanford.edu/data/facebook_combined.txt.gz"),
-        # should work TT - ("cora_content", "https://linqs-data.soe.ucsc.edu/public/datasets/cora/cora.zip"),
-        # commented because these graphs have their edges in lakhs
-        # ("web-Google", "https://snap.stanford.edu/data/web-Google.txt.gz"),
-        # ("amazon0601", "https://snap.stanford.edu/data/amazon0601.txt.gz"),
     ],
 }
 
+
+# ---------------- MAIN EXECUTION LOOP ----------------
 for size, graphs in datasets.items():
     raw_dir = f"raw_graphs/{size}"
-    output_dir = f"{size}_graphs"  # small_graphs or large_graphs
-
+    output_dir = f"{size}_graphs"
     os.makedirs(raw_dir, exist_ok=True)
     os.makedirs(output_dir, exist_ok=True)
 
     for name, url in graphs:
         filename = os.path.basename(url)
         raw_path = os.path.join(raw_dir, filename)
-        adj_path = os.path.join(output_dir, os.path.splitext(filename)[0] + ".adj")
+        
+        # Adjust output path to remove archive extension parts for cleaner ADJ name
+        base_name = os.path.splitext(filename)[0].split(".tar")[0].split(".zip")[0].split(".7z")[0]
+        adj_path = os.path.join(output_dir, base_name + ".adj")
 
-        # Skip if already converted
         if os.path.exists(adj_path):
             print(f"⚡ Skipping {name}: already converted ({adj_path})")
             continue
 
-        # Download file if not present
         if not os.path.exists(raw_path):
             print(f"⬇️ Downloading {name} ...")
             try:
-                headers = {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-                }
+                headers = {'User-Agent': 'Mozilla/5.0'}
                 with requests.get(url, stream=True, verify=False, timeout=60, headers=headers) as r:
                     r.raise_for_status()
                     with open(raw_path, "wb") as f:
@@ -339,16 +301,26 @@ for size, graphs in datasets.items():
                 print(f"❌ Failed to download {name}: {e}")
                 continue
 
-        # Convert to adjacency list
         try:
-            # Check if it's a zip file - if so, load_graph already handles everything
-            if raw_path.endswith('.zip') or raw_path.endswith('.7z'):
-                load_graph(raw_path)
+            # Archives are handled by the load_graph function, 
+            # which either returns a G or raises an error.
+            if raw_path.endswith('.zip') or raw_path.endswith('.7z') or raw_path.endswith('.tar.gz') or raw_path.endswith('.tgz'):
+                # For archives, we rely on load_graph's recursive call, which returns the G object.
+                G = load_graph(raw_path) 
+                
+                # If an archive returns a graph, save it immediately (like the single file case)
+                if G is not None:
+                     # Use convert_graph_to_adjlist to apply relabeling and save
+                    convert_graph_to_adjlist(raw_path, adj_path)
+                
             else:
+                # Direct conversion for single files
                 convert_graph_to_adjlist(raw_path, adj_path)
+                
         except Exception as e:
             print(f"❌ Failed to convert {name}: {e}")
 
+
 # Cleanup raw directories
-shutil.rmtree("raw_graphs")
-print("🎯 All requested graph datasets processed.")
+shutil.rmtree("raw_graphs", ignore_errors=True)
+print("\n🎯 All requested graph datasets processed and raw files cleaned up.")
