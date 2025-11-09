@@ -101,12 +101,21 @@ def local_search(G):
         if not all(u in G[v] for v in clique):
             candidates.remove(u)
 
+    n = G.keys().__len__()
+    add = 0
+    swap = 0
+    remove_expand = 0
+
     # Main improvement loop
     while improved:
         improved = False
 
         # ADD: add a vertex v with degree ordering and candidate pruning
         add_candidates = sorted(candidates, key=lambda v: len(G[v]), reverse=True)
+        add += 1
+
+        if (add == n):
+            break
 
         for v in add_candidates:
             
@@ -125,6 +134,10 @@ def local_search(G):
 
         # SWAP: try replacing low-degree vertex
         sorted_clique = sorted(clique, key=lambda u: len(G[u]))
+        swap += 1
+
+        if (swap == n):
+            break
 
         for u in sorted_clique:
 
@@ -153,6 +166,10 @@ def local_search(G):
 
         # REMOVE + EXPAND: Remove a vertex and try for better
         sorted_clique2 = sorted(clique, key=lambda x: len(G[x]))
+        remove_expand += 1
+
+        if (remove_expand == n):
+            break   
 
         for u in sorted_clique2:
             reduced = clique - {u}                                                      # Remove vertex u from the clique
