@@ -271,6 +271,124 @@ datasets = {
     ],
 }
 
+print("\n--- 🔄 Processing additional small graphs ---")
+
+# Define directories for these new graphs
+additional_raw_dir = "raw_graphs/small_additional"
+output_dir = "small_graphs"
+os.makedirs(additional_raw_dir, exist_ok=True)
+os.makedirs(output_dir, exist_ok=True) # Should already exist, but safe
+
+karate_adj_path = os.path.join(output_dir, "karate_club.adj")
+if os.path.exists(karate_adj_path):
+    print("⚡ Skipping karate_club: already converted.")
+else:
+    try:
+        print("🧘 Generating Karate Club graph using NetworkX...")
+        G_karate = nx.karate_club_graph()
+        # Convert string labels ("Mr. Hi", "Officer") to integers for consistency
+        G_karate_int = nx.convert_node_labels_to_integers(G_karate, first_label=0)
+        save_as_adjlist(G_karate_int, karate_adj_path)
+        print(f"✅ Saved adjacency list: {karate_adj_path} ({len(G_karate_int.nodes())} nodes, {len(G_karate_int.edges())} edges)")
+    except Exception as e:
+        print(f"❌ Failed to generate karate_club: {e}")
+
+# --- 2. Generate Les Misérables Graph ---
+les_mis_adj_path = os.path.join(output_dir, "les_miserables.adj")
+if os.path.exists(les_mis_adj_path):
+    print("⚡ Skipping les_miserables: already converted.")
+else:
+    try:
+        print("🇫🇷 Generating Les Misérables graph using NetworkX...")
+        G_les_mis = nx.les_miserables_graph()
+        # Convert string character names to integers
+        G_les_mis_int = nx.convert_node_labels_to_integers(G_les_mis, first_label=0)
+        save_as_adjlist(G_les_mis_int, les_mis_adj_path)
+        print(f"✅ Saved adjacency list: {les_mis_adj_path} ({len(G_les_mis_int.nodes())} nodes, {len(G_les_mis_int.edges())} edges)")
+    except Exception as e:
+        print(f"❌ Failed to generate les_miserables: {e}")
+
+# --- 3. Generate Florentine Families Graph ---
+florentine_adj_path = os.path.join(output_dir, "florentine_families.adj")
+if os.path.exists(florentine_adj_path):
+    print("⚡ Skipping florentine_families: already converted.")
+else:
+    try:
+        print("🇮🇹 Generating Florentine Families graph using NetworkX...")
+        G_florentine = nx.florentine_families_graph()
+        # Convert string family names to integers
+        G_florentine_int = nx.convert_node_labels_to_integers(G_florentine, first_label=0)
+        save_as_adjlist(G_florentine_int, florentine_adj_path)
+        print(f"✅ Saved adjacency list: {florentine_adj_path} ({len(G_florentine_int.nodes())} nodes, {len(G_florentine_int.edges())} edges)")
+    except Exception as e:
+        print(f"❌ Failed to generate florentine_families: {e}")
+
+# --- 4. Generate Davis Southern Women Graph ---
+davis_adj_path = os.path.join(output_dir, "davis_southern_women.adj")
+if os.path.exists(davis_adj_path):
+    print("⚡ Skipping davis_southern_women: already converted.")
+else:
+    try:
+        print("👩 Generating Davis Southern Women graph using NetworkX...")
+        # This graph is originally bipartite, but we load it as a standard graph
+        G_davis = nx.davis_southern_women_graph() 
+        # Convert string names (women and events) to integers
+        G_davis_int = nx.convert_node_labels_to_integers(G_davis, first_label=0)
+        save_as_adjlist(G_davis_int, davis_adj_path)
+        print(f"✅ Saved adjacency list: {davis_adj_path} ({len(G_davis_int.nodes())} nodes, {len(G_davis_int.edges())} edges)")
+    except Exception as e:
+        print(f"❌ Failed to generate davis_southern_women: {e}")
+
+for size, graphs in datasets.items():
+    raw_dir = f"raw_graphs/{size}"
+    output_dir = f"{size}_graphs"
+    os.makedirs(raw_dir, exist_ok=True)
+    os.makedirs(output_dir, exist_ok=True)
+
+    for name, url in graphs:
+        filename = os.path.basename(url)
+        raw_path = os.path.join(raw_dir, filename)
+        
+        # Adjust output path to remove archive extension parts for cleaner ADJ name
+        base_name = os.path.splitext(filename)[0].split(".tar")[0].split(".zip")[0].split(".7z")[0]
+        adj_path = os.path.join(output_dir, base_name + ".adj")
+
+        if os.path.exists(adj_path):
+            print(f"⚡ Skipping {name}: already converted ({adj_path})")
+            continue
+
+        if not os.path.exists(raw_path):
+            print(f"⬇️ Downloading {name} ...")
+            try:
+                headers = {'User-Agent': 'Mozilla/5.0'}
+                with requests.get(url, stream=True, verify=False, timeout=60, headers=headers) as r:
+                    r.raise_for_status()
+                    with open(raw_path, "wb") as f:
+                        for chunk in r.iter_content(chunk_size=8192):
+                            f.write(chunk)
+                print(f"✅ Downloaded: {raw_path}")
+            except requests.exceptions.RequestException as e:
+                print(f"❌ Failed to download {name}: {e}")
+                continue
+
+        try:
+            # Archives are handled by the load_graph function, 
+            # which either returns a G or raises an error.
+            if raw_path.endswith('.zip') or raw_path.endswith('.7z') or raw_path.endswith('.tar.gz') or raw_path.endswith('.tgz'):
+                # For archives, we rely on load_graph's recursive call, which returns the G object.
+                G = load_graph(raw_path) 
+                
+                # If an archive returns a graph, save it immediately (like the single file case)
+                if G is not None:
+                     # Use convert_graph_to_adjlist to apply relabeling and save
+                    convert_graph_to_adjlist(raw_path, adj_path)
+                
+            else:
+                # Direct conversion for single files
+                convert_graph_to_adjlist(raw_path, adj_path)
+                
+        except Exception as e:
+            print(f"❌ Failed to convert {name}: {e}")
 
 # ---------------- MAIN EXECUTION LOOP ----------------
 for size, graphs in datasets.items():
