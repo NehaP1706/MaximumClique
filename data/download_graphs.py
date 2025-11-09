@@ -267,6 +267,7 @@ datasets = {
     "large": [
         ("facebook_combined", "https://snap.stanford.edu/data/facebook_combined.txt.gz"),
         ("large500", "https://graphchallenge.s3.amazonaws.com/synthetic/partitionchallenge/static/simulated_blockmodel_graph_500_nodes.tar.gz"),
+        ("large1000", "https://graphchallenge.s3.amazonaws.com/synthetic/partitionchallenge/static/simulated_blockmodel_graph_1000_nodes.tar.gz"),
     ],
 }
 
