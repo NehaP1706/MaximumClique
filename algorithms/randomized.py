@@ -64,7 +64,7 @@ def randomized_max_clique(graph, restarts=100):
 
     for _ in range(restarts):
         # Step 1: Random starting vertex
-        start_vertex = random.choice(list(graph.nodes()))
+        start_vertex = random.choice(list(graph.keys()))
         current_clique = {start_vertex}
 
         # Candidates: neighbors of the starting vertex
