@@ -6,6 +6,7 @@ import networkx as nx
 import urllib3
 import pandas as pd
 import zipfile
+import tarfile
 from tempfile import TemporaryDirectory
 from scipy.io import mmread
 
@@ -24,11 +25,77 @@ def load_graph(path):
     Automatically handles GraphML files with unsupported attribute types
     (vector_float, vector_string, short) by converting them to strings.
     """
-    ext = os.path.splitext(path)[1].lower()
+    # ext = os.path.splitext(path)[1].lower()
+    fname = os.path.basename(path).lower()
+
+    # Detect .tar.gz and .tgz first
+    if fname.endswith(".tar.gz") or fname.endswith(".tgz"):
+        ext = ".tar.gz"
+    else:
+        ext = os.path.splitext(path)[1].lower()
+
 
     if ext == ".gz":
         with gzip.open(path, "rt", encoding="utf-8") as f:
             G = nx.read_edgelist(f, comments="#", nodetype=int)
+    elif ext in [".tar", ".tar.gz", ".tgz"]:
+        # Handle tar and tar.gz archives
+        with TemporaryDirectory() as tmpdir:
+            with tarfile.open(path, "r:*") as tar:
+                tar.extractall(tmpdir)
+
+            extracted_files = []
+            for root, dirs, files in os.walk(tmpdir):
+                for file in files:
+                    if not file.startswith('.') and '__MACOSX' not in root:
+                        extracted_files.append(os.path.join(root, file))
+
+            print(f"🔍 Found {len(extracted_files)} files in {os.path.basename(path)}")
+            for f in extracted_files:
+                print(f"   - {os.path.basename(f)}")
+
+            if not extracted_files:
+                raise ValueError(f"No files found inside {path}")
+
+            # Prefer files with "edge" in the name
+            graph_file = None
+            for f in extracted_files:
+                fname_lower = os.path.basename(f).lower()
+                if "edge" in fname_lower and (f.endswith(".tsv") or f.endswith(".txt") or f.endswith(".edges")):
+                    graph_file = f
+                    break
+
+            # Fallback: if no "edges" file found, pick the first .tsv/.txt/.edges file
+            if not graph_file:
+                for f in extracted_files:
+                    if f.endswith(".tsv") or f.endswith(".txt") or f.endswith(".edges"):
+                        graph_file = f
+                        break
+
+            if not graph_file:
+                raise ValueError(f"No suitable edge list found inside {path}")
+
+            # ---- Simple parser: ignore the 3rd column (weights) ----
+            print(f"📂 Loading edge list from {graph_file}")
+
+            edges = []
+            with open(graph_file) as f:
+                for line in f:
+                    parts = line.strip().split('\t')
+                    if len(parts) >= 2:
+                        try:
+                            u, v = int(parts[0]), int(parts[1])
+                            edges.append((u, v))
+                        except ValueError:
+                            continue  # skip malformed lines safely
+
+            G = nx.Graph()
+            G.add_edges_from(edges)
+            print(f"✅ Loaded unweighted graph: {len(G.nodes())} nodes, {len(G.edges())} edges")
+
+            if len(G.edges()) == 0:
+                raise ValueError(f"No valid edges found in {graph_file}")
+
     elif ext in [".txt", ".edges", ".clq"]:
         if ext == ".clq":
             # DIMACS .clq format
@@ -219,6 +286,7 @@ datasets = {
         # ("marvel_heroes", "https://chatox.github.io/networks-science-course/practicum/data/marvel-hero.csv"),
         # ("flavor_network", "https://chatox.github.io/networks-science-course/practicum/data/flavor-network/"),
         # ("ogdos_100", "<link-to-OGDOS-graph-~100nodes>"),
+        ("holy", "https://graphchallenge.s3.amazonaws.com/synthetic/partitionchallenge/static/simulated_blockmodel_graph_50_nodes.tar.gz"),
     ],
     "medium": [
         # ("adjnoun_adj", "http://statml.com/download/data_7z/misc/adjnoun_adjacency.7z"),
