@@ -1,90 +1,87 @@
-import networkx as nx
 import time
 
-def find_maximum_clique(G):
+def find_maximum_clique_from_adj(adj_matrix):
     """
+    Greedy algorithm to find a (not necessarily optimal) maximum clique 
+    from an adjacency matrix representation of an undirected graph.
+
     Parameters:
-        G (networkx.Graph): Input undirected graph
+        adj_matrix (list[list[int]] or numpy.ndarray): 
+            - Adjacency matrix representation of the graph
+            - adj_matrix[i][j] = 1 if there is an edge between vertex i and vertex j
+            - 0 otherwise
+
     Returns:
-        clique (list[int]): List of vertex indices forming the maximum clique
-        runtime (float): Time taken in seconds
+        best_clique (list[int]): List of vertex indices forming the largest clique found
+        runtime (float): Time taken to execute the algorithm (in seconds)
     """
 
-    start_time = time.time()  # Record the start time for runtime measurement
+    # Record start time for performance measurement
+    start_time = time.time()
 
-    # Step 1: Sort all nodes by degree (descending)
-    # Nodes with more connections are more likely to belong to a large clique.
-    nodes_sorted = sorted(G.nodes(), key=lambda x: G.degree[x], reverse=True)
+    # Total number of vertices in the graph
+    n = len(adj_matrix)
 
-    # Step 2: Initialize the best clique found so far (empty initially)
+    # ---------------------------------------------------------------
+    # STEP 1: Compute degrees and sort nodes in descending order of degree
+    # ---------------------------------------------------------------
+    # Degree of a vertex = sum of entries in its row (i.e., number of connections)
+    degrees = [sum(adj_matrix[i]) for i in range(n)]
+
+    # Sort vertices by their degree (higher-degree nodes are tried first)
+    nodes_sorted = sorted(range(n), key=lambda x: degrees[x], reverse=True)
+
+    # Initialize the best clique found so far as an empty list
     best_clique = []
 
-    # Step 3: Try to build a clique starting from each node (greedy trial)
+    # ---------------------------------------------------------------
+    # STEP 2: Try to greedily build a clique starting from each node
+    # ---------------------------------------------------------------
     for node in nodes_sorted:
-        # Start a new clique with this node
+        # Start a new clique with the current node
         clique = [node]
 
-        # Step 4: Consider adding other nodes that appear later in the sorted list
+        # Attempt to add other vertices to the clique
         for other in nodes_sorted:
-            # Skip if it's the same node
+            # Skip if we are comparing the same vertex
             if other == node:
                 continue
 
-            # Check if 'other' is connected to *all* current members of the clique
-            # (i.e., if adding it would still make a complete subgraph)
-            if all(G.has_edge(other, member) for member in clique):
+            # Check if 'other' is connected to ALL current clique members
+            # If yes, we can safely add it to the clique
+            if all(adj_matrix[other][member] == 1 for member in clique):
                 clique.append(other)
 
-        # Step 5: Update best clique if this one is larger
+        # Update the best clique if we found a larger one
         if len(clique) > len(best_clique):
             best_clique = clique
 
-    end_time = time.time()  # Record end time
+    # Record end time
+    end_time = time.time()
 
-    # Return both the clique and total runtime
+    # Return the best clique and runtime
     return best_clique, (end_time - start_time)
 
 
-# ---------------------------------------------
-# MAIN FUNCTION — runs only when file is executed directly
-# ---------------------------------------------
+# ---------------------------------------------------------------
+# MAIN FUNCTION — Example Test Run
+# ---------------------------------------------------------------
 if __name__ == "__main__":
-    # Example test (runs only when you execute this file directly)
-
-    # Create a simple undirected graph
-    G = nx.Graph()
-    edges = [
-        (1, 2), (2, 3), (1, 3),   # Clique of size 3: {1, 2, 3}
-        (3, 4), (4, 5),           # Extra connections not forming larger clique
-        (2, 4)
+    # Example adjacency matrix for a 5-vertex graph
+    # Vertices: 0, 1, 2, 3, 4
+    # Edges: (0,1), (1,2), (0,2), (2,3), (3,4), (1,3)
+    adj_matrix = [
+        [0, 1, 1, 0, 0],  # Node 0 connected to 1, 2
+        [1, 0, 1, 1, 0],  # Node 1 connected to 0, 2, 3
+        [1, 1, 0, 1, 0],  # Node 2 connected to 0, 1, 3
+        [0, 1, 1, 0, 1],  # Node 3 connected to 1, 2, 4
+        [0, 0, 0, 1, 0]   # Node 4 connected to 3
     ]
-    G.add_edges_from(edges)
 
-    # Run the greedy maximum clique finder
-    clique, runtime = find_maximum_clique(G)
+    # Run the greedy clique finder
+    clique, runtime = find_maximum_clique_from_adj(adj_matrix)
 
-    # Print the results
+    # Display results
     print(f"Greedy Clique Found: {clique}")
     print(f"Clique Size: {len(clique)}")
     print(f"Execution Time: {runtime:.6f} seconds")
-
-
-# -------------------------------------------------
-# 💡 COMPLEXITY ANALYSIS:
-# -------------------------------------------------
-# Let n = number of vertices, m = number of edges.
-#
-# Step 1: Sorting vertices by degree -> O(n log n)
-# Step 2–4: Nested loops through nodes -> O(n^2)
-#   - For each node, we check edges using 'all()' which in the worst case checks up to O(n)
-#   - So the overall upper bound ≈ O(n^3) in dense graphs
-#
-# ✅ TIME COMPLEXITY: O(n^3) in worst case (dense graph)
-# ✅ AVERAGE CASE (sparser graphs): closer to O(n^2)
-#
-# ✅ SPACE COMPLEXITY: O(n)
-#   - We store 'nodes_sorted', 'clique', and 'best_clique' — all at most O(n)
-#   - Graph storage (adjacency list) is handled by NetworkX internally as O(n + m)
-#
-# Hence, Total Space: O(n + m)
-# -------------------------------------------------
