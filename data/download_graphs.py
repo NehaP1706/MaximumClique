@@ -217,15 +217,15 @@ datasets = {
         # ("karate_club", "https://github.com/mlabonne/graph-datasets/blob/main/node_classification/karate-club/karate.gml"),
         # ("game_of_thrones", "https://chatox.github.io/networks-science-course/practicum/data/game-of-thrones/"),
         # ("marvel_heroes", "https://chatox.github.io/networks-science-course/practicum/data/marvel-hero.csv"),
-        ("student_cooperation", "https://chatox.github.io/networks-science-course/practicum/data/student-cooperation.graphml"),
         # ("flavor_network", "https://chatox.github.io/networks-science-course/practicum/data/flavor-network/"),
         # ("ogdos_100", "<link-to-OGDOS-graph-~100nodes>"),
-        ("brock200_2", "https://iridia.ulb.ac.be/~fmascia/files/DIMACS/brock200_2.clq"),
     ],
     "medium": [
         # ("adjnoun_adj", "http://statml.com/download/data_7z/misc/adjnoun_adjacency.7z"),
         ("dimac-c125", "https://iridia.ulb.ac.be/~fmascia/files/DIMACS/C125.9.clq"),
         ("keller-4", "https://iridia.ulb.ac.be/~fmascia/files/DIMACS/keller4.clq"),
+        ("student_cooperation", "https://chatox.github.io/networks-science-course/practicum/data/student-cooperation.graphml"),
+        ("brock200_2", "https://iridia.ulb.ac.be/~fmascia/files/DIMACS/brock200_2.clq"),
         # ("tscc", "https://statml.com/download/data_7z/tscc/scc_enron-only.7z")
     ],
     "large": [
