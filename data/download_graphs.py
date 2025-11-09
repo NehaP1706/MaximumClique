@@ -254,6 +254,7 @@ datasets = {
         ("holy", "https://graphchallenge.s3.amazonaws.com/synthetic/partitionchallenge/static/simulated_blockmodel_graph_50_nodes.tar.gz"),
         ("dolphin","https://sites.cc.gatech.edu/dimacs10/archive/data/clustering/dolphins.graph.bz2"),
         ("karate","https://sites.cc.gatech.edu/dimacs10/archive/data/clustering/karate.graph.bz2"),
+        ("MANN_a9", "https://raw.githubusercontent.com/jamestrimble/max-weight-clique-instances/master/DIMACS/weighted/MANN_a9.clq"),
         ("small100", "https://graphchallenge.s3.amazonaws.com/synthetic/partitionchallenge/static/simulated_blockmodel_graph_100_nodes.tar.gz"),
     ],
     "medium": [
