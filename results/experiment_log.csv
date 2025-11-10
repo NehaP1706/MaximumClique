@@ -1,0 +1,17 @@
+1,small,florentine_families.adj,15,greedy,3,0.000096
+1,small,florentine_families.adj,15,local_search,3,0.000279
+1,small,florentine_families.adj,15,randomized,3,0.000170
+1,small,florentine_families.adj,15,local_random,3,0.002144
+1,small,florentine_families.adj,15,simulated_annealing,3,0.098939
+1,small,florentine_families.adj,15,bron_kerbosch,3,0.000194
+2,medium,c-fat200-1.adj,200,greedy,12,0.014742
+2,medium,c-fat200-1.adj,200,local_search,12,0.015862
+2,medium,c-fat200-1.adj,200,randomized,12,0.004817
+2,medium,c-fat200-1.adj,200,local_random,12,0.008627
+2,medium,c-fat200-1.adj,200,simulated_annealing,11,0.174942
+2,medium,c-fat200-1.adj,200,bron_kerbosch,11,0.009254
+3,brock400_3.adj,400,greedy,22,0.089040
+3,brock400_3.adj,400,local_search,22,0.711277
+3,brock400_3.adj,400,randomized,20,0.014962
+3,brock400_3.adj,400,local_random,24,4.228197
+3,brock400_3.adj,400,simulated_annealing,24,0.000031
