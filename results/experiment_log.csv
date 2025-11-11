@@ -10,8 +10,9 @@
 2,medium,c-fat200-1.adj,200,local_random,12,0.008627
 2,medium,c-fat200-1.adj,200,simulated_annealing,11,0.174942
 2,medium,c-fat200-1.adj,200,bron_kerbosch,11,0.009254
-3,brock400_3.adj,400,greedy,22,0.089040
-3,brock400_3.adj,400,local_search,22,0.711277
-3,brock400_3.adj,400,randomized,20,0.014962
-3,brock400_3.adj,400,local_random,24,4.228197
-3,brock400_3.adj,400,simulated_annealing,24,0.000031
+3,c-fat500-1.adj,500,greedy,14,0.060554
+3,c-fat500-1.adj,500,local_search,14,0.060105
+3,c-fat500-1.adj,500,randomized,14,0.005324
+3,c-fat500-1.adj,500,local_random,14,0.017898
+3,c-fat500-1.adj,500,simulated_annealing,14,0.000033
+3,c-fat500-1.adj,500,bron_kerbosch,14,0.020035
