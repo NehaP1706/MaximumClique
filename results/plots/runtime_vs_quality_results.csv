@@ -1,0 +1,155 @@
+Graph_Type,Graph_Name,Nodes,Algorithm,Clique_Size,Runtime_Seconds
+Small,MANN_a9.adj,45,Bron-Kerbosch,16,0.8660964965820312
+Small,MANN_a9.adj,45,Greedy,16,0.000865936279296875
+Small,MANN_a9.adj,45,Local Search,16,0.007160663604736328
+Small,MANN_a9.adj,45,Simulated Annealing,15,0.06962037086486816
+Small,davis_southern_women.adj,32,Bron-Kerbosch,2,9.465217590332031e-05
+Small,davis_southern_women.adj,32,Greedy,2,0.0003001689910888672
+Small,davis_southern_women.adj,32,Local Search,2,0.0006670951843261719
+Small,davis_southern_women.adj,32,Simulated Annealing,2,0.009567499160766602
+Small,dolphins.graph.adj,38,Bron-Kerbosch,3,7.128715515136719e-05
+Small,dolphins.graph.adj,38,Greedy,3,0.00040149688720703125
+Small,dolphins.graph.adj,38,Local Search,3,0.0009453296661376953
+Small,dolphins.graph.adj,38,Simulated Annealing,3,0.006918668746948242
+Small,florentine_families.adj,15,Bron-Kerbosch,3,3.8623809814453125e-05
+Small,florentine_families.adj,15,Greedy,3,6.937980651855469e-05
+Small,florentine_families.adj,15,Local Search,3,9.393692016601562e-05
+Small,florentine_families.adj,15,Simulated Annealing,3,0.006945371627807617
+Small,karate.graph.adj,19,Bron-Kerbosch,3,3.7670135498046875e-05
+Small,karate.graph.adj,19,Greedy,3,0.00010538101196289062
+Small,karate.graph.adj,19,Local Search,3,0.0003268718719482422
+Small,karate.graph.adj,19,Simulated Annealing,2,0.009006738662719727
+Small,karate_club.adj,34,Bron-Kerbosch,5,9.965896606445312e-05
+Small,karate_club.adj,34,Greedy,5,0.0003247261047363281
+Small,karate_club.adj,34,Local Search,5,0.0008070468902587891
+Small,karate_club.adj,34,Simulated Annealing,4,0.017102956771850586
+Small,les_miserables.adj,77,Bron-Kerbosch,10,0.0003376007080078125
+Small,les_miserables.adj,77,Greedy,10,0.0017485618591308594
+Small,les_miserables.adj,77,Local Search,10,0.002012968063354492
+Small,les_miserables.adj,77,Simulated Annealing,7,0.015204191207885742
+Small,simulated_blockmodel_graph_100_nodes.adj,100,Bron-Kerbosch,2,0.00011754035949707031
+Small,simulated_blockmodel_graph_100_nodes.adj,100,Greedy,2,0.0028772354125976562
+Small,simulated_blockmodel_graph_100_nodes.adj,100,Local Search,2,0.006032466888427734
+Small,simulated_blockmodel_graph_100_nodes.adj,100,Simulated Annealing,2,0.011719465255737305
+Small,simulated_blockmodel_graph_50_nodes.adj,50,Bron-Kerbosch,6,0.0006487369537353516
+Small,simulated_blockmodel_graph_50_nodes.adj,50,Greedy,6,0.0007307529449462891
+Small,simulated_blockmodel_graph_50_nodes.adj,50,Local Search,6,0.0008623600006103516
+Small,simulated_blockmodel_graph_50_nodes.adj,50,Simulated Annealing,5,0.020652294158935547
+Small,simulated_blockmodel_graph_50_nodes.tar.adj,50,Bron-Kerbosch,6,0.000522613525390625
+Small,simulated_blockmodel_graph_50_nodes.tar.adj,50,Greedy,6,0.0007257461547851562
+Small,simulated_blockmodel_graph_50_nodes.tar.adj,50,Local Search,6,0.0008602142333984375
+Small,simulated_blockmodel_graph_50_nodes.tar.adj,50,Simulated Annealing,5,0.020629167556762695
+Medium,C125.9.adj,125,Greedy,31,0.008692264556884766
+Medium,C125.9.adj,125,Local Search,31,0.037516117095947266
+Medium,C125.9.adj,125,Simulated Annealing,29,0.23018956184387207
+Medium,C250.9.adj,250,Greedy,40,0.0345156192779541
+Medium,C250.9.adj,250,Local Search,40,0.7545030117034912
+Medium,C250.9.adj,250,Simulated Annealing,36,0.4994642734527588
+Medium,MANN_a27.adj,378,Greedy,125,0.26169848442077637
+Medium,MANN_a27.adj,378,Local Search,125,2.6155905723571777
+Medium,MANN_a27.adj,378,Simulated Annealing,118,2.6067919731140137
+Medium,adjnoun.graph.adj,55,Greedy,3,0.0008363723754882812
+Medium,adjnoun.graph.adj,55,Local Search,3,0.0019028186798095703
+Medium,adjnoun.graph.adj,55,Simulated Annealing,2,0.0090179443359375
+Medium,brock200_1.adj,200,Greedy,18,0.015255451202392578
+Medium,brock200_1.adj,200,Local Search,18,0.044846296310424805
+Medium,brock200_1.adj,200,Simulated Annealing,18,0.27227354049682617
+Medium,brock200_2.adj,200,Greedy,10,0.02931833267211914
+Medium,brock200_2.adj,200,Local Search,10,0.03577923774719238
+Medium,brock200_2.adj,200,Simulated Annealing,8,0.40554237365722656
+Medium,brock200_3.adj,200,Greedy,12,0.0337376594543457
+Medium,brock200_3.adj,200,Local Search,12,0.03168344497680664
+Medium,brock200_3.adj,200,Simulated Annealing,11,0.2486863136291504
+Medium,brock200_4.adj,200,Greedy,14,0.014160633087158203
+Medium,brock200_4.adj,200,Local Search,14,0.03315114974975586
+Medium,brock200_4.adj,200,Simulated Annealing,13,0.2394726276397705
+Medium,c-fat200-1.adj,200,Greedy,12,0.012250185012817383
+Medium,c-fat200-1.adj,200,Local Search,12,0.012881040573120117
+Medium,c-fat200-1.adj,200,Simulated Annealing,11,0.01747417449951172
+Medium,c-fat200-2.adj,200,Greedy,24,0.012242794036865234
+Medium,c-fat200-2.adj,200,Local Search,24,0.01451730728149414
+Medium,c-fat200-2.adj,200,Simulated Annealing,21,0.029832839965820312
+Medium,c-fat200-5.adj,200,Greedy,58,0.01921701431274414
+Medium,c-fat200-5.adj,200,Local Search,58,0.024028778076171875
+Medium,c-fat200-5.adj,200,Simulated Annealing,57,0.06552672386169434
+Medium,gen200_p0.9_44.adj,200,Greedy,35,0.023757457733154297
+Medium,gen200_p0.9_44.adj,200,Local Search,35,0.08349132537841797
+Medium,gen200_p0.9_44.adj,200,Simulated Annealing,31,0.42603206634521484
+Medium,gen200_p0.9_55.adj,200,Greedy,39,0.023489952087402344
+Medium,gen200_p0.9_55.adj,200,Local Search,39,0.14570403099060059
+Medium,gen200_p0.9_55.adj,200,Simulated Annealing,31,0.4604666233062744
+Medium,johnson16-2-4.adj,120,Greedy,8,0.01179957389831543
+Medium,johnson16-2-4.adj,120,Local Search,8,0.013081073760986328
+Medium,johnson16-2-4.adj,120,Simulated Annealing,8,0.36980581283569336
+Medium,keller4.adj,171,Greedy,11,0.02430105209350586
+Medium,keller4.adj,171,Local Search,11,0.08260607719421387
+Medium,keller4.adj,171,Simulated Annealing,10,0.2047746181488037
+Medium,san200_0.7_1.adj,200,Greedy,16,0.015233039855957031
+Medium,san200_0.7_1.adj,200,Local Search,16,0.052132606506347656
+Medium,san200_0.7_1.adj,200,Simulated Annealing,14,0.2953150272369385
+Medium,san200_0.7_2.adj,200,Greedy,13,0.015538454055786133
+Medium,san200_0.7_2.adj,200,Local Search,13,0.05719733238220215
+Medium,san200_0.7_2.adj,200,Simulated Annealing,12,0.3115234375
+Medium,san200_0.9_1.adj,200,Greedy,46,0.02810359001159668
+Medium,san200_0.9_1.adj,200,Local Search,46,0.08043861389160156
+Medium,san200_0.9_1.adj,200,Simulated Annealing,46,0.4782710075378418
+Large,C1000.9.adj,1000,Greedy,57,1.3410828113555908
+Large,C1000.9.adj,1000,Local Search,57,7.976343631744385
+Large,C1000.9.adj,1000,Simulated Annealing,50,2.9987385272979736
+Large,C500.9.adj,500,Greedy,48,0.20935583114624023
+Large,C500.9.adj,500,Local Search,48,1.6728689670562744
+Large,C500.9.adj,500,Simulated Annealing,40,1.74684476852417
+Large,DSJC1000_5.adj,1000,Greedy,14,0.8690409660339355
+Large,DSJC1000_5.adj,1000,Local Search,14,3.003800868988037
+Large,DSJC1000_5.adj,1000,Simulated Annealing,11,0.9959690570831299
+Large,DSJC500_5.adj,500,Greedy,12,0.10958290100097656
+Large,DSJC500_5.adj,500,Local Search,12,0.5029561519622803
+Large,DSJC500_5.adj,500,Simulated Annealing,9,0.48858141899108887
+Large,brock400_1.adj,400,Greedy,22,0.08219480514526367
+Large,brock400_1.adj,400,Local Search,22,0.3883683681488037
+Large,brock400_1.adj,400,Simulated Annealing,19,0.9777071475982666
+Large,brock400_2.adj,400,Greedy,22,0.08527731895446777
+Large,brock400_2.adj,400,Local Search,22,0.24946188926696777
+Large,brock400_2.adj,400,Simulated Annealing,18,0.6561949253082275
+Large,brock400_3.adj,400,Greedy,22,0.08441805839538574
+Large,brock400_3.adj,400,Local Search,22,0.769467830657959
+Large,brock400_3.adj,400,Simulated Annealing,19,0.6412391662597656
+Large,brock400_4.adj,400,Greedy,22,0.08033275604248047
+Large,brock400_4.adj,400,Local Search,23,0.0820920467376709
+Large,brock400_4.adj,400,Simulated Annealing,17,0.63594651222229
+Large,brock800_1.adj,800,Greedy,19,0.34734106063842773
+Large,brock800_1.adj,800,Local Search,19,1.840843677520752
+Large,brock800_1.adj,800,Simulated Annealing,16,1.3736858367919922
+Large,brock800_2.adj,800,Greedy,19,0.365753173828125
+Large,brock800_2.adj,800,Local Search,19,1.5849635601043701
+Large,brock800_2.adj,800,Simulated Annealing,16,1.0647284984588623
+Large,brock800_3.adj,800,Greedy,18,0.34400081634521484
+Large,brock800_3.adj,800,Local Search,18,1.1674671173095703
+Large,brock800_3.adj,800,Simulated Annealing,17,1.0507917404174805
+Large,brock800_4.adj,800,Greedy,19,0.3678758144378662
+Large,brock800_4.adj,800,Local Search,19,1.0288867950439453
+Large,brock800_4.adj,800,Simulated Annealing,15,1.0651459693908691
+Large,c-fat500-1.adj,500,Greedy,14,0.07539224624633789
+Large,c-fat500-1.adj,500,Local Search,14,0.0784142017364502
+Large,c-fat500-1.adj,500,Simulated Annealing,13,0.02263355255126953
+Large,c-fat500-10.adj,500,Greedy,126,0.1916637420654297
+Large,c-fat500-10.adj,500,Local Search,126,0.24721288681030273
+Large,c-fat500-10.adj,500,Simulated Annealing,125,0.13919782638549805
+Large,c-fat500-2.adj,500,Greedy,26,0.07765984535217285
+Large,c-fat500-2.adj,500,Local Search,26,0.08421564102172852
+Large,c-fat500-2.adj,500,Simulated Annealing,25,0.037369728088378906
+Large,c-fat500-5.adj,500,Greedy,64,0.10292840003967285
+Large,c-fat500-5.adj,500,Local Search,64,0.12001752853393555
+Large,c-fat500-5.adj,500,Simulated Annealing,63,0.0816645622253418
+Large,facebook_combined.txt.adj,4039,Greedy,68,6.054142951965332
+Large,facebook_combined.txt.adj,4039,Local Search,68,31.344237565994263
+Large,facebook_combined.txt.adj,4039,Simulated Annealing,16,0.14816975593566895
+Large,gen400_p0.9_55.adj,400,Greedy,46,0.11339449882507324
+Large,gen400_p0.9_55.adj,400,Local Search,46,1.6334898471832275
+Large,gen400_p0.9_55.adj,400,Simulated Annealing,40,1.0285987854003906
+Large,simulated_blockmodel_graph_1000_nodes.adj,1000,Greedy,2,0.2798020839691162
+Large,simulated_blockmodel_graph_1000_nodes.adj,1000,Local Search,2,0.6196024417877197
+Large,simulated_blockmodel_graph_1000_nodes.adj,1000,Simulated Annealing,2,0.056243181228637695
+Large,simulated_blockmodel_graph_500_nodes.adj,500,Greedy,2,0.07054281234741211
+Large,simulated_blockmodel_graph_500_nodes.adj,500,Local Search,2,0.1510915756225586
+Large,simulated_blockmodel_graph_500_nodes.adj,500,Simulated Annealing,2,0.02032756805419922
