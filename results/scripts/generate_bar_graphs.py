@@ -5,8 +5,8 @@ import sys
 import os
 
 # --- CONFIGURATION ---
-CSV_FILE = 'runtime_vs_quality_results.csv'
-OUTPUT_FILE = 'bar_chart_comparison.png'
+CSV_FILE = '../plots/runtime_vs_quality_results.csv'
+OUTPUT_FILE = '../plots/bar_chart_comparison.png'
 # Colors matching your scatter plot
 COLORS = {
     'Bron-Kerbosch': '#2ecc71',       # Green

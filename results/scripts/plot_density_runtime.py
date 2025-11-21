@@ -8,7 +8,7 @@ import os
 LOG_FILE = '../experiment_log.csv' 
 DATA_DIR = '../../data'
 DENSITY_THRESHOLD = 0.25 
-OUTPUT_FILE = 'runtime_sparse_vs_dense.png'
+OUTPUT_FILE = '../plots/runtime_sparse_vs_dense.png'
 
 # Exact colors from your plot_from_logs.py
 COLORS = {

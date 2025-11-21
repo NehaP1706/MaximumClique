@@ -15,10 +15,7 @@ def setup_paths():
     
     # Possible locations for 'algorithms'
     possible_algo_paths = [
-        os.path.join(script_dir, 'algorithms'),
-        os.path.join(script_dir, '..', 'algorithms'),
         os.path.join(script_dir, '..', '..', 'algorithms'),
-        '/home/arushi/Downloads/MaximumClique/algorithms'
     ]
     
     algo_path_found = None
@@ -36,10 +33,7 @@ def setup_paths():
 
     # Possible locations for 'data'
     possible_data_paths = [
-        os.path.join(script_dir, 'data'),
-        os.path.join(script_dir, '..', 'data'),
         os.path.join(script_dir, '..', '..', 'data'),
-        '/home/arushi/Downloads/MaximumClique/data'
     ]
     
     data_path_found = None
@@ -272,7 +266,7 @@ def plot_results(df):
 if __name__ == "__main__":
     df = run_experiments()
     if not df.empty:
-        csv_file = "runtime_vs_quality_results.csv"
+        csv_file = "../plot/runtime_vs_quality_results.csv"
         df.to_csv(csv_file, index=False)
         print(f"\n✅ Results saved to: {os.path.abspath(csv_file)}")
         plot_results(df)

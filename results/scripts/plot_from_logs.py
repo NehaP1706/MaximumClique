@@ -8,8 +8,8 @@ import os
 # ==============================================================================
 # Path to CSV relative to this script location (results/plots/)
 CSV_PATH = os.path.join(os.path.dirname(__file__), '..', 'experiment_log.csv')
-SCATTER_OUTPUT = 'runtime_vs_quality_scatter.png'
-BAR_OUTPUT = 'algorithm_comparison_bars.png'
+SCATTER_OUTPUT = '../plots/runtime_vs_quality_scatter.png'
+BAR_OUTPUT = '../plots/algorithm_comparison_bars.png'
 
 # Colors for consistency
 COLORS = {

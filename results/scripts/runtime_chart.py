@@ -31,11 +31,7 @@ def find_csv_file():
     """
     # Possible locations relative to the script
     possible_paths = [
-        'experiment_log.csv',  # Same directory
         '../experiment_log.csv',  # Parent directory
-        '../../experiment_log.csv',  # Two levels up
-        '../data/experiment_log.csv',  # In data folder
-        '../../data/experiment_log.csv',  # Two levels up in data folder
     ]
 
     for path in possible_paths:
@@ -119,7 +115,7 @@ def calculate_average_runtimes(df_clean):
     chart_df = pd.DataFrame(chart_data)
 
     # Save processed data
-    output_csv = 'average_runtime_by_algorithm_and_size.csv'
+    output_csv = '../plots/average_runtime_by_algorithm_and_size.csv'
     chart_df.to_csv(output_csv, index=False)
     print("Average Runtime by Algorithm and Size Category:")
     print(chart_df.to_string(index=False))
@@ -127,7 +123,7 @@ def calculate_average_runtimes(df_clean):
 
     return chart_df
 
-def create_grouped_bar_chart(chart_df, output_filename='runtime_comparison_chart.png'):
+def create_grouped_bar_chart(chart_df, output_filename='../plots/runtime_comparison_chart.png'):
     """
     Create and save a grouped bar chart visualization.
 

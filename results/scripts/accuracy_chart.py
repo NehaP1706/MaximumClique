@@ -98,7 +98,7 @@ def calculate_average_accuracies(merged):
 
     chart_df = pd.DataFrame(chart_data)
 
-    output_csv = os.path.join(os.path.dirname(__file__), 'average_accuracy_by_algorithm_and_size.csv')
+    output_csv = os.path.join(os.path.dirname(__file__), '../plots/average_accuracy_by_algorithm_and_size.csv')
     chart_df.to_csv(output_csv, index=False)
     print('\nAverage Accuracy by Algorithm and Size Category:')
     print(chart_df.to_string(index=False))
