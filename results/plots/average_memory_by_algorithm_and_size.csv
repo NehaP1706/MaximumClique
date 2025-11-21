@@ -1,0 +1,7 @@
+algorithm,small,medium,large
+bron_kerbosch,2.7927272727272725,0.0,0.0
+greedy,0.8533333333333334,0.0,2.4380952380952383
+local_random,1.8618181818181818,0.0,5.632
+local_search,0.0,0.0,4.876190476190477
+randomized,0.0,0.0,4.096
+simulated_annealing,1.8618181818181818,0.0,0.0

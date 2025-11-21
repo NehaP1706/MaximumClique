@@ -23,12 +23,7 @@ import sys
 
 def find_csv_file():
     possible_paths = [
-        'experiment_log.csv',
-        'results/experiment_log.csv',
-        '../experiment_log.csv',
-        '../../experiment_log.csv',
-        '../data/experiment_log.csv',
-        '../../data/experiment_log.csv',
+        '../experiment_log.csv' 
     ]
 
     for path in possible_paths:
@@ -114,7 +109,7 @@ def calculate_average_accuracies(merged):
 
 def create_grouped_bar_chart(chart_df, output_filename=None):
     if output_filename is None:
-        output_filename = os.path.join(os.path.dirname(__file__), 'accuracy_comparison_chart.png')
+        output_filename = os.path.join(os.path.dirname(__file__), '../plots/accuracy_comparison_chart.png')
     
     fig, ax = plt.subplots(figsize=(12, 8))
 
